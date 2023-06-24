@@ -96,7 +96,6 @@ class TicTacToe {
 
           return;
         }
-        // console.log(isWin, x, y);
       }
     }
   }
