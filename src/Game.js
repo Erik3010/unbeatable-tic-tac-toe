@@ -1,4 +1,4 @@
-import { parseToSVG } from "./utility";
+import { parseToSVG, createElement } from "./utility";
 import { X_TURN, O_TURN, DIRECTIONS } from "./constants";
 
 class TicTacToe {
@@ -73,7 +73,7 @@ class TicTacToe {
 
     this.checkWin();
 
-    this.nextTurn();
+    // this.nextTurn();
   }
   checkWin() {
     for (const [y, row] of this.board.entries()) {
@@ -91,38 +91,67 @@ class TicTacToe {
             y: y + dirY * 2,
             x: x + dirX * 2,
           });
-          this.animatePath(startCell, targetCell);
-          // console.log(startCell, targetCell);
+          this.animatePath(
+            { position: { y, x }, el: startCell },
+            { position: { y: y + dirY * 2, x: x + dirX * 2 }, el: targetCell }
+          );
 
           return;
         }
       }
     }
   }
-  animatePath(startCell, targetCell) {
-    const start = startCell.getBoundingClientRect();
-    const target = targetCell.getBoundingClientRect();
+  animatePath(start, target) {
+    const boardRect = this.boardEl.getBoundingClientRect();
+    const startRect = start.el.getBoundingClientRect();
+    const targetRect = target.el.getBoundingClientRect();
 
-    const { x, y, width, height } = this.boardEl.getBoundingClientRect();
+    const svg = createElement("svg", {
+      namespaced: true,
+      props: {
+        width: boardRect.width,
+        height: boardRect.height,
+        class: ["path-svg"],
+      },
+    });
 
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("width", width);
-    svg.setAttribute("height", height);
-    svg.classList.add("path-svg");
+    const startCenterX =
+      start.position.x === target.position.x
+        ? 0
+        : start.position.x > target.position.x
+        ? startRect.width / 2
+        : -(startRect.width / 2);
+    const startCenterY =
+      start.position.y === target.position.y ? 0 : -startRect.height / 2;
+    const startPos = {
+      x: startRect.x - boardRect.x + (startRect.width / 2 + startCenterX),
+      y: startRect.y - boardRect.y + (startRect.height / 2 + startCenterY),
+    };
 
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.classList.add("path");
-    path.setAttribute(
-      "d",
-      `M${start.x - x + start.width / 2} ${start.y - y + start.height / 2} L${
-        target.x - x + target.width / 2
-      } ${target.y - y + target.height / 2}`
-    );
+    const targetCenterX =
+      start.position.x === target.position.x
+        ? 0
+        : start.position.x < target.position.x
+        ? startRect.width / 2
+        : -startRect.width / 2;
+    const targetCenterY =
+      start.position.y === target.position.y ? 0 : startRect.height / 2;
+    const targetPos = {
+      x: targetRect.x - boardRect.x + (targetRect.width / 2 + targetCenterX),
+      y: targetRect.y - boardRect.y + (targetRect.height / 2 + targetCenterY),
+    };
+
+    const path = createElement("path", {
+      namespaced: true,
+      props: {
+        d: `M${startPos.x} ${startPos.y} L${targetPos.x} ${targetPos.y}`,
+        class: ["path", "animate"],
+      },
+    });
 
     const pathLength = path.getTotalLength();
     path.setAttribute("stroke-dashoffset", pathLength);
     path.setAttribute("stroke-dasharray", pathLength);
-    path.classList.add("animate");
 
     svg.appendChild(path);
     this.boardEl.appendChild(svg);
