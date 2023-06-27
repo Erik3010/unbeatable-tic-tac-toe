@@ -1,22 +1,32 @@
 import { parseToSVG, createElement } from "./utility";
 import { X_TURN, O_TURN, DIRECTIONS } from "./constants";
+import Minimax from "./minimax";
 
 class TicTacToe {
   constructor() {
     this.row = 3;
     this.col = 3;
 
-    this.turn = X_TURN;
+    this.turn = O_TURN;
 
     this.board = [];
     this.boardEl = document.querySelector(".board");
 
     this.assets = {};
     this.availableAssets = ["o.svg", "x.svg"];
+
+    this.minimax = new Minimax();
   }
   async init() {
     await this.loadAssets();
     this.initBoard();
+
+    // this.board = [
+    //   [1, null, 2],
+    //   [2, 2, null],
+    //   [2, 1, 1],
+    // ];
+    // this.checkWin();
   }
   async loadAssets() {
     const [o, x] = await Promise.all(
@@ -62,8 +72,26 @@ class TicTacToe {
     }
   }
   handleCellClick(cell, { y, x }) {
-    if (this.board[y][x] !== null) return;
+    if (this.board[y][x] !== null || this.turn === X_TURN) return;
     this.board[y][x] = this.turn;
+
+    // const result = this.minimax.calculate(
+    //   // [
+    //   //   [2, 1, 2],
+    //   //   [1, null, 1],
+    //   //   [2, 1, 2],
+    //   // ],
+    //   // [
+    //   //   [1, null, 2],
+    //   //   [2, null, null],
+    //   //   [2, 1, 1],
+    //   // ],
+    //   this.board,
+    //   X_TURN
+    // );
+    // // const result = this.minimax.calculate(this.board, this.turn);
+    // console.log(result, this.minimax.counter);
+    // // console.log(result);
 
     const type = this.turn === O_TURN ? "o" : "x";
     const svg = this.assets[type].cloneNode(true);
@@ -73,7 +101,26 @@ class TicTacToe {
 
     this.checkWin();
 
-    // this.nextTurn();
+    this.nextTurn();
+
+    setTimeout(this.botMove.bind(this), 250);
+    // this.botMove();
+  }
+  botMove() {
+    const { move } = this.minimax.calculate(this.board, X_TURN);
+    if (!move) return;
+
+    const type = this.turn === O_TURN ? "o" : "x";
+    const svg = this.assets[type].cloneNode(true);
+    const cell = this.getCellByCoordinate({ y: move.y, x: move.x });
+
+    cell.appendChild(svg);
+    this.animateCell(cell);
+
+    this.board[move.y][move.x] = X_TURN;
+    this.checkWin();
+
+    this.nextTurn();
   }
   checkWin() {
     for (const [y, row] of this.board.entries()) {
@@ -175,6 +222,18 @@ class TicTacToe {
       if (count >= 2) return { x: dirX, y: dirY };
     }
     return null;
+  }
+  get availableMoves() {
+    const moves = [];
+    for (const [y, row] of this.board.entries()) {
+      for (const [x, col] of row.entries()) {
+        if (col === null) moves.push({ y, x });
+      }
+    }
+    return moves;
+  }
+  get hasEmptyCell() {
+    return this.board.some((row) => row.some((cell) => cell === null));
   }
   nextTurn() {
     this.turn = (this.turn % 2) + 1;
