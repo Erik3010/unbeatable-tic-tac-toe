@@ -14,8 +14,8 @@ class Minimax {
     const moves = this.getAvailableMoves(board);
     // console.log(JSON.parse(JSON.stringify(board)), this.checkWin(board));
 
-    if (this.checkWin(board)) {
-      const winner = this.checkWin(board);
+    const winner = this.checkWin(board);
+    if (winner) {
       if (winner === O_TURN) {
         return { score: -1 };
       } else if (winner === X_TURN) {
