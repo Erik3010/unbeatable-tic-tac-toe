@@ -6,9 +6,11 @@ class Minimax {
     this.counter = 0;
     this.row = 3;
     this.col = 3;
+
+    this.INITIAL_DEPTH = 0;
   }
 
-  calculate(board, player) {
+  calculate(board, player, depth = this.INITIAL_DEPTH) {
     this.counter++;
 
     const moves = this.getAvailableMoves(board);
@@ -17,9 +19,9 @@ class Minimax {
     const winner = this.checkWin(board);
     if (winner) {
       if (winner === O_TURN) {
-        return { score: -1 };
+        return { score: depth - 10 };
       } else if (winner === X_TURN) {
-        return { score: 1 };
+        return { score: 10 - depth };
       }
     }
 
@@ -33,7 +35,7 @@ class Minimax {
       board[y][x] = player;
 
       const turn = this.nextTurn(player);
-      const score = this.calculate(board, turn).score;
+      const score = this.calculate(board, turn, depth + 1).score;
       if (player === X_TURN) {
         if (score > bestScore) {
           bestScore = score;

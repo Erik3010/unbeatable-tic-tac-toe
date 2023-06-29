@@ -107,7 +107,8 @@ class TicTacToe {
     // this.botMove();
   }
   botMove() {
-    const { move } = this.minimax.calculate(this.board, X_TURN);
+    const { move, score } = this.minimax.calculate(this.board, X_TURN);
+    // console.log(move, score);
     if (!move) return;
 
     const type = this.turn === O_TURN ? "o" : "x";
