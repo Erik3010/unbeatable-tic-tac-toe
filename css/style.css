@@ -19,18 +19,18 @@ body {
 }
 
 #app {
-  width: 600px;
-  height: 600px;
+  width: 400px;
+  height: 400px;
   position: relative;
 }
 
 .header {
-  margin-bottom: 7rem;
+  margin-bottom: 3rem;
   text-align: center;
 }
 
 .title {
-  font-size: 3.5rem;
+  font-size: 2.5rem;
 }
 
 .header .title {
@@ -68,6 +68,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.board .cell svg {
+  width: 90px;
+  aspect-ratio: 1;
 }
 
 .board .cell:nth-child(-n + 3) {
