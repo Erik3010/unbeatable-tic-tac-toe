@@ -1,5 +1,4 @@
 import { O_TURN, X_TURN } from "./constants";
-import { DIRECTIONS } from "./constants";
 
 class Minimax {
   constructor(game) {
