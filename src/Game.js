@@ -19,13 +19,6 @@ class TicTacToe {
   async init() {
     await this.loadAssets();
     this.initBoard();
-
-    // this.board = [
-    //   [1, null, 2],
-    //   [2, 2, null],
-    //   [2, 1, 1],
-    // ];
-    // this.checkWin();
   }
   async loadAssets() {
     const [o, x] = await Promise.all(
