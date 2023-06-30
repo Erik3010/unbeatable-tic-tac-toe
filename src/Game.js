@@ -1,5 +1,5 @@
 import { parseToSVG, createElement } from "./utility";
-import { X_TURN, O_TURN, DIRECTIONS } from "./constants";
+import { X_TURN, O_TURN, DIRECTIONS, AVAILABLE_ASSETS } from "./constants";
 import Minimax from "./minimax";
 
 class TicTacToe {
@@ -13,9 +13,8 @@ class TicTacToe {
     this.boardEl = document.querySelector(".board");
 
     this.assets = {};
-    this.availableAssets = ["o.svg", "x.svg"];
 
-    this.minimax = new Minimax();
+    this.minimax = new Minimax(this);
   }
   async init() {
     await this.loadAssets();
@@ -30,7 +29,7 @@ class TicTacToe {
   }
   async loadAssets() {
     const [o, x] = await Promise.all(
-      this.availableAssets.map(this.loadAsset.bind(this))
+      AVAILABLE_ASSETS.map(this.loadAsset.bind(this))
     );
 
     this.assets["o"] = o;
@@ -53,10 +52,9 @@ class TicTacToe {
     }
   }
   createCell({ y, x }) {
-    const cell = document.createElement("div");
-    const handler = this.handleCellClick.bind(this, cell, { y, x });
+    const cell = createElement("div", { props: { class: ["cell"] } });
 
-    cell.classList.add("cell");
+    const handler = this.handleCellClick.bind(this, cell, { y, x });
     cell.addEventListener("click", handler);
 
     return cell;
@@ -73,54 +71,28 @@ class TicTacToe {
   }
   handleCellClick(cell, { y, x }) {
     if (this.board[y][x] !== null || this.turn === X_TURN) return;
-    this.board[y][x] = this.turn;
 
-    // const result = this.minimax.calculate(
-    //   // [
-    //   //   [2, 1, 2],
-    //   //   [1, null, 1],
-    //   //   [2, 1, 2],
-    //   // ],
-    //   // [
-    //   //   [1, null, 2],
-    //   //   [2, null, null],
-    //   //   [2, 1, 1],
-    //   // ],
-    //   this.board,
-    //   X_TURN
-    // );
-    // // const result = this.minimax.calculate(this.board, this.turn);
-    // console.log(result, this.minimax.counter);
-    // // console.log(result);
-
-    const type = this.turn === O_TURN ? "o" : "x";
-    const svg = this.assets[type].cloneNode(true);
-
-    cell.appendChild(svg);
-    this.animateCell(cell);
-
-    this.checkWin();
-
-    this.nextTurn();
+    this.putCellInBoard({ y, x }, cell);
 
     setTimeout(this.botMove.bind(this), 250);
-    // this.botMove();
   }
   botMove() {
-    const { move, score } = this.minimax.calculate(this.board, X_TURN);
-    // console.log(move, score);
+    const { move } = this.minimax.calculate(this.board, X_TURN);
     if (!move) return;
+
+    this.putCellInBoard(move);
+  }
+  putCellInBoard({ y, x }, cellEl = null) {
+    this.board[y][x] = this.turn;
 
     const type = this.turn === O_TURN ? "o" : "x";
     const svg = this.assets[type].cloneNode(true);
-    const cell = this.getCellByCoordinate({ y: move.y, x: move.x });
+    const cell = cellEl ?? this.getCellByCoordinate({ y, x });
 
     cell.appendChild(svg);
+
     this.animateCell(cell);
-
-    this.board[move.y][move.x] = X_TURN;
     this.checkWin();
-
     this.nextTurn();
   }
   checkWin() {
@@ -204,10 +176,6 @@ class TicTacToe {
     svg.appendChild(path);
     this.boardEl.appendChild(svg);
   }
-  getCellByCoordinate({ y, x }) {
-    const order = y * this.row + x + 1;
-    return document.querySelector(`.cell:nth-child(${order})`);
-  }
   checkAroundCell({ y, x }) {
     for (const [dirX, dirY] of DIRECTIONS) {
       let count = 0;
@@ -224,6 +192,10 @@ class TicTacToe {
     }
     return null;
   }
+  getCellByCoordinate({ y, x }) {
+    const position = y * this.row + x + 1;
+    return document.querySelector(`.cell:nth-child(${position})`);
+  }
   get availableMoves() {
     const moves = [];
     for (const [y, row] of this.board.entries()) {
@@ -237,7 +209,10 @@ class TicTacToe {
     return this.board.some((row) => row.some((cell) => cell === null));
   }
   nextTurn() {
-    this.turn = (this.turn % 2) + 1;
+    this.turn = this.enemy;
+  }
+  get enemy() {
+    return (this.turn % 2) + 1;
   }
   inBoard({ y, x }) {
     return y >= 0 && x >= 0 && y < this.row && x < this.col;

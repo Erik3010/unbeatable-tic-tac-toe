@@ -2,20 +2,16 @@ import { O_TURN, X_TURN } from "./constants";
 import { DIRECTIONS } from "./constants";
 
 class Minimax {
-  constructor() {
+  constructor(game) {
     this.counter = 0;
-    this.row = 3;
-    this.col = 3;
 
+    this.game = game;
     this.INITIAL_DEPTH = 0;
   }
-
   calculate(board, player, depth = this.INITIAL_DEPTH) {
     this.counter++;
 
-    const moves = this.getAvailableMoves(board);
-    // console.log(JSON.parse(JSON.stringify(board)), this.checkWin(board));
-
+    const availableMoves = this.getAvailableMoves(board);
     const winner = this.checkWin(board);
     if (winner) {
       if (winner === O_TURN) {
@@ -25,28 +21,25 @@ class Minimax {
       }
     }
 
-    if (!moves.length) {
+    if (!availableMoves.length) {
       return { score: 0 };
     }
 
     let bestScore = player === X_TURN ? -Infinity : Infinity;
     let bestMove;
-    for (const { y, x } of moves) {
+    for (const { y, x } of availableMoves) {
       board[y][x] = player;
 
-      const turn = this.nextTurn(player);
-      const score = this.calculate(board, turn, depth + 1).score;
-      if (player === X_TURN) {
-        if (score > bestScore) {
-          bestScore = score;
-          bestMove = { y, x };
-        }
-      } else if (player === O_TURN) {
-        if (score < bestScore) {
-          bestScore = score;
-          bestMove = { y, x };
-        }
+      const enemy = this.nextTurn(player);
+      const { score } = this.calculate(board, enemy, depth + 1);
+      if (
+        (player === X_TURN && score > bestScore) ||
+        (player === O_TURN && score < bestScore)
+      ) {
+        bestScore = score;
+        bestMove = { y, x };
       }
+
       board[y][x] = null;
     }
 
@@ -74,15 +67,12 @@ class Minimax {
         const nextY = y + Math.sign(dirY) * step;
         const nextX = x + Math.sign(dirX) * step;
 
-        if (!this.inBoard({ y: nextY, x: nextX })) continue;
+        if (!this.game.inBoard({ y: nextY, x: nextX })) continue;
         if (board[nextY][nextX] === current) count++;
       }
       if (count >= 2) return true;
     }
     return false;
-  }
-  inBoard({ y, x }) {
-    return y >= 0 && x >= 0 && y < this.row && x < this.col;
   }
   getAvailableMoves(board) {
     const moves = [];
