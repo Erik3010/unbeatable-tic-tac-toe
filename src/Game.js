@@ -95,31 +95,31 @@ class TicTacToe {
     this.checkWin();
     this.nextTurn();
   }
-  checkWin() {
-    for (const [y, row] of this.board.entries()) {
+  isWin(board = this.board) {
+    for (const [y, row] of board.entries()) {
       for (const [x, cell] of row.entries()) {
-        if (cell === null) continue;
-
-        const isWin = this.checkAroundCell({ y, x });
-        if (isWin) {
-          const { y: dirY, x: dirX } = isWin;
-          const targetNum =
-            (y + isWin.y * 2) * this.row + (x + isWin.x * 2) + 1;
-
-          const startCell = this.getCellByCoordinate({ y, x });
-          const targetCell = this.getCellByCoordinate({
-            y: y + dirY * 2,
-            x: x + dirX * 2,
-          });
-          this.animatePath(
-            { position: { y, x }, el: startCell },
-            { position: { y: y + dirY * 2, x: x + dirX * 2 }, el: targetCell }
-          );
-
-          return;
-        }
+        const direction = this.checkAroundCell({ y, x }, board);
+        if (cell === null || !direction) continue;
+        return [cell, { y, x }, direction];
       }
     }
+    return false;
+  }
+  checkWin() {
+    const isWin = this.isWin();
+    if (!isWin) return;
+
+    const [_, { y, x }, { y: dirY, x: dirX }] = isWin;
+
+    const startCell = this.getCellByCoordinate({ y, x });
+    const targetCell = this.getCellByCoordinate({
+      y: y + dirY * (this.row - 1),
+      x: x + dirX * (this.col - 1),
+    });
+    this.animatePath(
+      { position: { y, x }, el: startCell },
+      { position: { y: y + dirY * 2, x: x + dirX * 2 }, el: targetCell }
+    );
   }
   animatePath(start, target) {
     const boardRect = this.boardEl.getBoundingClientRect();
@@ -176,29 +176,29 @@ class TicTacToe {
     svg.appendChild(path);
     this.boardEl.appendChild(svg);
   }
-  checkAroundCell({ y, x }) {
+  checkAroundCell({ y, x }, board = this.board) {
     for (const [dirX, dirY] of DIRECTIONS) {
       let count = 0;
-      const current = this.board[y][x];
+      const current = board[y][x];
 
       for (let step = 1; step <= 2; step++) {
         const nextY = y + Math.sign(dirY) * step;
         const nextX = x + Math.sign(dirX) * step;
 
         if (!this.inBoard({ y: nextY, x: nextX })) continue;
-        if (this.board[nextY][nextX] === current) count++;
+        if (board[nextY][nextX] === current) count++;
       }
       if (count >= 2) return { x: dirX, y: dirY };
     }
-    return null;
+    return false;
   }
   getCellByCoordinate({ y, x }) {
     const position = y * this.row + x + 1;
     return document.querySelector(`.cell:nth-child(${position})`);
   }
-  get availableMoves() {
+  getAvailableMoves(board = this.board) {
     const moves = [];
-    for (const [y, row] of this.board.entries()) {
+    for (const [y, row] of board.entries()) {
       for (const [x, col] of row.entries()) {
         if (col === null) moves.push({ y, x });
       }

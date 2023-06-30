@@ -11,9 +11,10 @@ class Minimax {
   calculate(board, player, depth = this.INITIAL_DEPTH) {
     this.counter++;
 
-    const availableMoves = this.getAvailableMoves(board);
-    const winner = this.checkWin(board);
-    if (winner) {
+    const availableMoves = this.game.getAvailableMoves(board);
+    const isWin = this.game.isWin(board);
+    if (isWin) {
+      const [winner] = isWin;
       if (winner === O_TURN) {
         return { score: depth - 10 };
       } else if (winner === X_TURN) {
@@ -47,41 +48,6 @@ class Minimax {
   }
   nextTurn(turn) {
     return (turn % 2) + 1;
-  }
-  checkWin(board) {
-    for (const [y, row] of board.entries()) {
-      for (const [x, cell] of row.entries()) {
-        if (cell === null) continue;
-        const isWin = this.checkAroundCell({ y, x }, board);
-        if (isWin) return cell;
-      }
-    }
-    return false;
-  }
-  checkAroundCell({ y, x }, board) {
-    for (const [dirX, dirY] of DIRECTIONS) {
-      let count = 0;
-      const current = board[y][x];
-
-      for (let step = 1; step <= 2; step++) {
-        const nextY = y + Math.sign(dirY) * step;
-        const nextX = x + Math.sign(dirX) * step;
-
-        if (!this.game.inBoard({ y: nextY, x: nextX })) continue;
-        if (board[nextY][nextX] === current) count++;
-      }
-      if (count >= 2) return true;
-    }
-    return false;
-  }
-  getAvailableMoves(board) {
-    const moves = [];
-    for (const [y, row] of board.entries()) {
-      for (const [x, col] of row.entries()) {
-        if (col === null) moves.push({ y, x });
-      }
-    }
-    return moves;
   }
 }
 
