@@ -130,20 +130,21 @@ class TicTacToe {
 
     const halfWidth = startRect.width / 2;
     const halfHeight = startRect.height / 2;
+    const offset = 10;
 
-    const startCenterX =
-      Math.sign(start.position.x - target.position.x) * halfWidth;
+    const startSignX = Math.sign(start.position.x - target.position.x);
+    const startCenterX = startSignX * halfWidth + startSignX * -1 * offset;
     const startCenterY =
-      start.position.y === target.position.y ? 0 : -halfHeight;
+      start.position.y === target.position.y ? 0 : -halfHeight + offset;
     const startPos = {
       x: startRect.x - boardRect.x + (halfWidth + startCenterX),
       y: startRect.y - boardRect.y + (halfHeight + startCenterY),
     };
 
-    const targetCenterX =
-      Math.sign(target.position.x - start.position.x) * halfWidth;
+    const targetSignX = Math.sign(target.position.x - start.position.x);
+    const targetCenterX = targetSignX * halfWidth + targetSignX * -1 * offset;
     const targetCenterY =
-      start.position.y === target.position.y ? 0 : halfHeight;
+      start.position.y === target.position.y ? 0 : halfHeight - offset;
     const targetPos = {
       x: targetRect.x - boardRect.x + (targetRect.width / 2 + targetCenterX),
       y: targetRect.y - boardRect.y + (targetRect.height / 2 + targetCenterY),
