@@ -102,8 +102,9 @@ body {
 }
 
 .path {
-  stroke-width: 10;
-  stroke: #fae882;
+  stroke-width: 8;
+  stroke: #816af3;
+  stroke-linecap: round;
   animation-duration: 0.5s;
 }
 
