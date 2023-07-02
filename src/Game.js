@@ -128,27 +128,22 @@ class TicTacToe {
       },
     });
 
+    const halfWidth = startRect.width / 2;
+    const halfHeight = startRect.height / 2;
+
     const startCenterX =
-      start.position.x === target.position.x
-        ? 0
-        : start.position.x > target.position.x
-        ? startRect.width / 2
-        : -(startRect.width / 2);
+      Math.sign(start.position.x - target.position.x) * halfWidth;
     const startCenterY =
-      start.position.y === target.position.y ? 0 : -startRect.height / 2;
+      start.position.y === target.position.y ? 0 : -halfHeight;
     const startPos = {
-      x: startRect.x - boardRect.x + (startRect.width / 2 + startCenterX),
-      y: startRect.y - boardRect.y + (startRect.height / 2 + startCenterY),
+      x: startRect.x - boardRect.x + (halfWidth + startCenterX),
+      y: startRect.y - boardRect.y + (halfHeight + startCenterY),
     };
 
     const targetCenterX =
-      start.position.x === target.position.x
-        ? 0
-        : start.position.x < target.position.x
-        ? startRect.width / 2
-        : -startRect.width / 2;
+      Math.sign(target.position.x - start.position.x) * halfWidth;
     const targetCenterY =
-      start.position.y === target.position.y ? 0 : startRect.height / 2;
+      start.position.y === target.position.y ? 0 : halfHeight;
     const targetPos = {
       x: targetRect.x - boardRect.x + (targetRect.width / 2 + targetCenterX),
       y: targetRect.y - boardRect.y + (targetRect.height / 2 + targetCenterY),
